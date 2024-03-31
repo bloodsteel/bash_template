@@ -1,0 +1,48 @@
+$(cat /data/apps/data/wanghaifeng/bash_template/test2.yml)
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${HOSTNAME}
+  labels:
+    age: $(if [ "a" == "a" ];then echo 19; else echo 20; fi)
+    $(if [ "abc" == "abc" ];then 
+        printf "label: abc"
+    fi)
+    {# "comment: this is a comment" #}
+    # this is a comment
+    $(a=0; for i in ${!labels[@]};do
+        if [ ${a} == 0 ];then
+            printf "%s: %s\n" "${i}" "${labels[${i}]}" 
+        else
+            printf "    %s: %s\n" "${i}" "${labels[${i}]}"
+        fi
+        a=$((a+1))
+    done)
+numbers:
+$(for i in ${nums[@]};do
+    echo "  - ${i}"
+done)
+shell: |
+  {%raw%}
+  a="name"
+  if [ "${a}" == "name" ];then
+      echo "hahah"
+  else
+      echo "heheh"
+  fi
+  {%endraw%}
+
+shell2: |
+  {% raw %}
+  a="name"
+  if [ "${a}" == "name" ];then
+      echo "hahah"
+  else
+      echo "heheh"
+  fi
+  {% endraw %}
+
+
+
+
