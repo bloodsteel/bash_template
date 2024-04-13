@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    $(yaml_dump_map annotations 2 0)
+  labels:
+    $(yaml_dump_map labels 2 0)
+  name: ${app_name}
+  namespace: ${app_namespace}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: ${app_replicas}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      $(yaml_dump_map labels 3 0)
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+      labels:
+        $(yaml_dump_map labels 4 0)
+    spec:
+      containers:
+      - image: ${app_image}
+        imagePullPolicy: IfNotPresent
+        name: ${app_name}
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        ports:
+        - containerPort: ${http_port}
+          name: http
+          protocol: TCP
+        - containerPort: ${https_port}
+          name: https
+          protocol: TCP
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 510
+      terminationGracePeriodSeconds: 30

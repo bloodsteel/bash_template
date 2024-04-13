@@ -1,4 +1,4 @@
-$(cat /data/apps/data/wanghaifeng/bash_template/test2.yml)
+$(cat test2.yml)
 ---
 apiVersion: v1
 kind: Service
@@ -21,7 +21,7 @@ metadata:
     done)
 numbers:
 $(for i in ${nums[@]};do
-    echo "  - ${i}"
+    printf "  - ${i}\n"
 done)
 shell: |
   {%raw%}

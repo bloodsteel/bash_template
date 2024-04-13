@@ -1,0 +1,4 @@
+labels:
+  $(
+      grep -v '^#' /etc/fstab | indent_from_stdin 2 0
+  )

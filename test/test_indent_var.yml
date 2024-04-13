@@ -1,0 +1,5 @@
+labels:
+  $(
+      a="$(grep -v '^#' /etc/fstab)"
+      indent_file_or_var var "${a}" 2 0
+  )

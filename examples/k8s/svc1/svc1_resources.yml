@@ -1,0 +1,7 @@
+---
+$(cat svc1_deploy.yml)
+---
+$(cat svc1_svc.yml)
+---
+$(cat svc1_ingress.yml)
+

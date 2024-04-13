@@ -13,8 +13,55 @@ end_token="___end___"
 tmp_work_base_dir="/tmp/.bash_template"
 # 去除注释
 # doc=$(grep -v '{#.*#}' ${file_name}; echo "${end_token}")
-
 rm_cmd=/bin/rm
+
+indent_from_stdin(){
+    local space_count=${1:-0} first_indent=${2:-0}
+    local space_num=""
+    for((i=0;i<${space_count};i++));do
+        space_num="${space_num} "
+    done
+    # 判断是否要对首行进行缩进，默认不进行，即使用此函数时，要将其放到合适的缩进处
+    if [[ ${first_indent} == 0 ]];then
+        for((i=0;i<${space_count};i++));do
+            printf "\b"
+        done
+    fi
+    while read line; do 
+        printf  "%s%s\n" "${space_num}" "${line}"
+    done
+}
+
+# 引入某个文件时，控制是否缩进的函数
+# 第一个参数是缩进的类型，file or var
+# 第二个参数是文件名, 或者变量名
+# 第三个参数是缩进空格数
+# 第四个参数，0或者大于0，用于判断是否首行缩进的
+indent_file_or_var(){
+    local indent_type="${1}" source_name="$2" space_count=${3:-0} first_indent=${4:-0}
+    local space_num=""
+    for((i=0;i<${space_count};i++));do
+        space_num="${space_num} "
+    done
+    # 判断是否要对首行进行缩进，默认不进行，即使用此函数时，要将其放到合适的缩进处
+    if [[ ${first_indent} == 0 ]];then
+        for((i=0;i<${space_count};i++));do
+            printf "\b"
+        done
+    fi
+    if [ "${indent_type}" == "file" ];then
+        while read line; do 
+            printf  "%s%s\n" "${space_num}" "${line}"
+        done < "${source_name}"
+    elif [ "${indent_type}" == "var" ];then
+        while read line; do 
+            printf  "%s%s\n" "${space_num}" "${line}"
+        done <<< "${source_name}"
+    else
+        printf "the indent_type is error with ${indent_type}\n" >&2
+        return 1
+    fi
+}
 
 # 第一个参数是数组名
 # 第二个参数可以省略，是缩进的层级
@@ -22,12 +69,12 @@ rm_cmd=/bin/rm
 yaml_dump_array(){
     local arr_name=$1 layer=${2:-0}
     local first_indent=${3:-0} arr=()
-    eval arr=(\${${arr_name}[@]})
+    eval arr=(\"\${${arr_name}[@]}\")
     #printf '  -' {1..10}
     # 存储空格数量
     local space_num=""
     if [[ ${layer} == 0 ]];then
-        printf '\b - %s\n'  ${arr[@]}
+        printf '\b - %s\n'  "${arr[@]}"
     else
         layer=$((layer*2))
         for((i=0;i<${layer};i++));do
@@ -39,7 +86,7 @@ yaml_dump_array(){
                 printf "\b"
             done
         fi
-        printf "${space_num}- %s\n"  ${arr[@]}
+        printf "${space_num}- %s\n"  "${arr[@]}"
     fi
 }
 
@@ -47,13 +94,13 @@ yaml_dump_array(){
 yaml_dump_map(){
     local arr_name=$1 k_arr=() v_arr=() k_len=0
     local layer=${2:-0}  first_indent=${3:-0}
-    eval v_arr=(\${${arr_name}[@]}) k_arr=(\${!${arr_name}[@]})
+    eval v_arr=(\"\${${arr_name}[@]}\") k_arr=(\"\${!${arr_name}[@]}\")
     k_len=${#k_arr[@]}
     # 存储空格数量
     local space_num=""
     if [[ ${layer} == 0 ]];then
         for((i=0;i<${k_len};i++));do
-            printf '%s: %s\n'  "${k_arr[${i}]}" "${v_arr[${i}]}"
+            printf '%s: "%s"\n'  "${k_arr[${i}]}" "${v_arr[${i}]}"
         done
     else
         layer=$((layer*2))
@@ -67,7 +114,7 @@ yaml_dump_map(){
             done
         fi
         for((i=0;i<${k_len};i++));do
-            printf "${space_num}%s: %s\n" "${k_arr[${i}]}" "${v_arr[${i}]}"
+            printf "${space_num}%s: \"%s\"\n" "${k_arr[${i}]}" "${v_arr[${i}]}"
         done
     fi
     #echo "${key_arr[@]}"
@@ -77,7 +124,7 @@ yaml_dump_map(){
 template_base(){
     local file_name=$1
     if [ ! -e "${file_name}" ];then
-        printf "the ${file_name} isn't exist."
+        printf "the ${file_name} isn't exist.\n"
         return 1
     fi
     # 生成临时文件
@@ -185,7 +232,9 @@ template_base(){
     # 如果有需要写回文件的 raw 内容, 则不去掉末尾的结尾符
     # 在这里判断是不太成立的，因为递归的情况下，会将不该替换掉的，也给替换掉, 所以改为在下个函数内进行操作
     #if grep "^${tmp_work_dir}.*\.txt$" ${tmp_file_to_render} &> /dev/null;then
-    eval 'printf "'"${doc}"'"' > ${tmp_render_file}
+    # printf 在这里有些问题, 主要是 % 转义时
+    #eval 'printf "'"${doc}"'"' > ${tmp_render_file}
+    eval 'echo "'"${doc}"'"' > ${tmp_render_file}
     #else
     #    eval 'echo "'"${doc}"'"' | sed 's/'${end_token}'//' > ${tmp_render_file}
     #    eval 'echo "'"${doc}"'"' > ${tmp_render_file}
@@ -244,6 +293,8 @@ template(){
     ${rm_cmd} -r ${tmp_work_dir}
     
 }
+export -f indent_from_stdin
+export -f indent_file_or_var
 export -f yaml_dump_array
 export -f yaml_dump_map
 export -f template_base
@@ -263,6 +314,9 @@ function main(){
             printf "please provide a file name.\n"
             help_f
         fi
+    else
+        set +e
+        set +o pipefail
     fi
 }
 

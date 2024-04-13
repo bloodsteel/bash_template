@@ -1,0 +1,2 @@
+labels:
+  $(indent_file_or_var file /etc/fstab 2 0)
