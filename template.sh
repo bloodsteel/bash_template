@@ -377,7 +377,7 @@ template(){
         sed '/'${end_token}'/d' ${tmp_file_to_render}
     fi
     # 删除临时目录
-    #${rm_cmd} -r ${tmp_work_dir}
+    ${rm_cmd} -r ${tmp_work_dir}
     
 }
 export -f indent_from_stdin
