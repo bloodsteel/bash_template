@@ -1,0 +1,12 @@
+$(
+    export parent_content=$(date)
+    template test_inherit_parent.yml
+)
+$(export parent_content_2=$(date); template test_inherit_parent_2.yml)
+my_content: $(
+    if [ -n "${my_content}" ];then
+        printf "%s" "${my_content}"
+    else
+        printf "default_content"
+    fi
+)

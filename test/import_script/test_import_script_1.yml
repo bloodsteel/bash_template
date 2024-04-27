@@ -1,0 +1,12 @@
+script: |
+  $(
+    #echo '{%raw%}'
+    indent_file_or_var file test_script_2.sh 2 1
+    #echo '{%endraw%}'
+  )
+script2: |
+  $(
+    #echo '{%raw%}'
+    template test_script_2.sh | indent_from_stdin 2 1
+    #echo '{%endraw%}'
+  )

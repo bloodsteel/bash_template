@@ -21,7 +21,7 @@ I couldn't find it, so I'll figure it out for myself.
 
 # examples
 
-## basic usage
+## a simple template
 
 ```yaml
 # test2.yml
@@ -31,8 +31,8 @@ $(cat test3.yml)
 ```
 
 ```bash
-#### test_source.sh in test dir
-# source test_source.sh
+#### env_var.sh in test dir
+# source env_var.sh
 # template test2.yml 
 name: /opt/mycode/bash_template/test
 age: 18
@@ -40,7 +40,35 @@ name: "I'm test3.yml"
 
 ```
 
-## a complex example that include supporting comment
+## only load a file
+
+```yaml
+# cat test_import_script_2.yml 
+script3: |
+  $(
+    load_file test_script.sh 2 1
+  )
+
+```
+
+```bash
+# cat test_script.sh 
+#!/bin/bash
+str="My name is test_script"
+echo "${str}"
+```
+
+the result
+```bash
+# template test_import_script_2.yml 
+script3: |
+  #!/bin/bash
+  str="My name is test_script"
+  echo "${str}"
+
+```
+
+## a complex example 
 
 ```yaml
 $(cat test2.yml)
@@ -156,5 +184,6 @@ shell2: |
 * `indent_file_or_var`: check in `test/test_indent_file.yml` and `test/test_indent_var.yml`
 * `yaml_dump_array`: check in `test/test_yaml_dump_array.yml`
 * `yaml_dump_map`: check in `test/test_yaml_dump_map.yml`
+* `load_file`: check in `test/import_script/test_import_script_2.yml`
 
 

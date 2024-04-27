@@ -1,0 +1,4 @@
+script3: |
+  $(
+    load_file test_script.sh 2 1
+  )

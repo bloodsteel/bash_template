@@ -30,9 +30,29 @@
 * 模板继承, 比如在一个模板中，引用其他文件 `$(cat /tmp/test2.yml)`
 
 
+# 安装脚本
+## 直接使用脚本
+
+将脚本放至 /bin 目录下, 给予执行权限
+```bash
+wget https://github.com/bloodsteel/bash_template/blob/main/template.sh -o /bin/template.sh
+chmod +x /bin/template.sh
+ln -sv /bin/template.sh /bin/template
+template --help
+```
+
+## 使用函数
+```bash
+wget https://github.com/bloodsteel/bash_template/blob/main/template.sh /etc/profile.d/template.sh
+source /etc/profile.d/template.sh
+template --help
+
+```
+
 # examples
 
-## 基本使用
+
+## 简单的模板
 
 ```yaml
 # test2.yml
@@ -42,8 +62,8 @@ $(cat test3.yml)
 ```
 
 ```bash
-##test_source.sh 脚本在 test 目录下
-# source test_source.sh
+##env_var.sh 脚本在 test 目录下
+# source env_var.sh
 # template test2.yml 
 name: /opt/mycode/bash_template/test
 age: 18
@@ -51,7 +71,36 @@ name: "I'm test3.yml"
 
 ```
 
-## 一个带有注释的复杂的案例
+## 仅加载文件
+
+```yaml
+# cat test_import_script_2.yml 
+script3: |
+  $(
+    load_file test_script.sh 2 1
+  )
+
+```
+
+```bash
+# cat test_script.sh 
+#!/bin/bash
+str="My name is test_script"
+echo "${str}"
+```
+
+执行结果
+```bash
+# template test_import_script_2.yml 
+script3: |
+  #!/bin/bash
+  str="My name is test_script"
+  echo "${str}"
+
+```
+
+
+## 一个复杂的案例
 
 ```yaml
 $(cat test2.yml)
@@ -168,5 +217,5 @@ shell2: |
 * `indent_file_or_var`: 针对文件或者多行变量进行缩进的函数，示例见 `test/test_indent_file.yml` and `test/test_indent_var.yml`
 * `yaml_dump_array`: 将数组打印为 yaml 形式, 示例见 `test/test_yaml_dump_array.yml`
 * `yaml_dump_map`: 将关联数组打印为 yaml 形式，示例见 `test/test_yaml_dump_map.yml`
-
+* `load_file`: 仅将文件加载至模板当中，不会递归渲染
 

@@ -1,0 +1,7 @@
+parent_content: $(
+    if [ -n "${parent_content}" ];then
+        printf "%s" "${parent_content}"
+    else
+        printf "parent_content"
+    fi
+)
